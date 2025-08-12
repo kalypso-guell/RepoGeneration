@@ -29,7 +29,7 @@ print("Bienvenidx a la app de calculadora!")
 
 operacion_a_realizar = input("Indica la operacion matematica que deseas realizar: suma, resta, multiplicar, dividir: ")
 
-if (operacion_a_realizar == "suma" or operacion_a_realizar == "resta" or operacion_a_realizar == "dividir" or operacion_a_realizar == "dividir"):
+if (operacion_a_realizar == "suma" or operacion_a_realizar == "resta" or operacion_a_realizar == "multiplicar" or operacion_a_realizar == "dividir"):
     num1 = float(input("Ingrese el primer numero: "))
     num2 = float(input("Ingresa el segundo numero: "))
     if (operacion_a_realizar == "suma"):
