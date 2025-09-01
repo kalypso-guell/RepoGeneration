@@ -53,8 +53,7 @@ console.log(kia.velocidad)//no es necesario los () porque es un getter.
 
 //incrementar velocidad al kia
 
-
-// kia.velocidad = 50 //le cambio la velocidad con el setter
+ kia.velocidad = 50 //le cambio la velocidad con el setter
 
 console.log(kia)
 
