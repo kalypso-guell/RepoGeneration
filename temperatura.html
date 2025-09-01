@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Temperatura</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .cargando {
+            color: #666;
+        }
+        .error {
+            background-color: #ffe6e6;
+            color: #d32f2f;
+        }
+        .exito {
+            background-color: #e6ffe6;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Consulta de Temperatura</h1>
+        
+        <label for="ciudad">Ingresa el nombre de una ciudad:</label>
+        <br>
+        <input type="text" id="ciudad" placeholder="Ej: Madrid, Barcelona, París...">
+        <br>
+        <button onclick="obtenerTemperatura()">Obtener Temperatura</button>
+        
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        async function obtenerTemperatura() {
+            const ciudad = document.getElementById('ciudad').value.trim();
+            const resultadoDiv = document.getElementById('resultado');
+            
+            // Validar que se ingresó una ciudad
+            if (!ciudad) {
+                resultadoDiv.innerHTML = '<div class="error">Por favor, ingresa el nombre de una ciudad</div>';
+                return;
+            }
+            
+            // Mostrar mensaje de carga
+            resultadoDiv.innerHTML = '<div class="cargando">Buscando coordenadas y temperatura...</div>';
+            
+            try {
+                // Primero obtener las coordenadas de la ciudad usando la API de geocoding
+                const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(ciudad)}&count=1`;
+                
+                const geocodingResponse = await fetch(geocodingUrl);
+                const geocodingData = await geocodingResponse.json();
+                
+                if (!geocodingData.results || geocodingData.results.length === 0) {
+                    throw new Error('Ciudad no encontrada');
+                }
+                
+                const { latitude, longitude, name, country } = geocodingData.results[0];
+                
+                // Ahora obtener el pronóstico del tiempo con las coordenadas
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m`;
+                
+                const weatherResponse = await fetch(weatherUrl);
+                const weatherData = await weatherResponse.json();
+                
+                if (!weatherData.current) {
+                    throw new Error('No se pudieron obtener los datos del clima');
+                }
+                
+                const temperatura = weatherData.current.temperature_2m;
+                const unidad = weatherData.current_units.temperature_2m;
+                
+                // Mostrar el resultado
+                resultadoDiv.innerHTML = `
+                    <div class="exito">
+                        <strong>${name}, ${country}</strong><br>
+                        Temperatura actual: <strong>${temperatura} ${unidad}</strong>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultadoDiv.innerHTML = `
+                    <div class="error">
+                        Error: ${error.message || 'No se pudo obtener la información'}
+                    </div>
+                `;
+            }
+        }
+        
+        // Permitir buscar con la tecla Enter
+        document.getElementById('ciudad').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                obtenerTemperatura();
+            }
+        });
+    </script>
+</body>
+</html>
